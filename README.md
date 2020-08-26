@@ -129,7 +129,7 @@ Please read more information in [TinyGSM Library](https://github.com/vshymanskyy
 
 ---
 
-### How to migrate from [BlynkESP32_BT_WF library](https://github.com/khoih-prog/BlynkESP32_BT_WF) 
+### How to migrate from [BlynkGSM_Manager library](https://github.com/khoih-prog/BlynkGSM_Manager) 
 
 #### For ESP32-based boards
 
@@ -137,7 +137,7 @@ In your code, just replacing
 
 1. `BlynkSimpleTinyGSM_M.h`             with `BlynkSimpleTinyGSM_Async_M.h`
 2. `BlynkSimpleEsp32_GSM_WF.h`          with `BlynkSimpleEsp32_GSM_Async_WF.h`
-3. `BlynkSimpleEsp32_GSM_Async_WFM.h`   with `BlynkSimpleEsp32_GSM_Async_WFM.h`
+3. `BlynkSimpleEsp32_GSM_WFM.h`         with `BlynkSimpleEsp32_GSM_Async_WFM.h`
 
 #### For ESP8266-based boards
 
@@ -560,7 +560,7 @@ void loop()
 
 Please take a look at other examples, as well.
 
-1. File [Async_TTGO_TCALL_GSM.ino](examples/Async_TTGO_TCALL_GSM/TTGO_TCALL_GSM.ino)
+1. File [Async_TTGO_TCALL_GSM.ino](examples/Async_TTGO_TCALL_GSM/Async_TTGO_TCALL_GSM.ino)
 
 ```
 #include "defines.h"
