@@ -106,6 +106,7 @@ More modems may be supported later:
 ## Installation
 
 ### Use Arduino Library Manager
+
 The best and easiest way is to use `Arduino Library Manager`. Search for `Blynk_Async_GSM_Manager`, then select / install the latest version. You can also use this link [![arduino-library-badge](https://www.ardu-badge.com/badge/Blynk_Async_GSM_Manager.svg?)](https://www.ardu-badge.com/Blynk_Async_GSM_Manager) for more detailed instructions.
 
 ### Manual Install
@@ -119,7 +120,7 @@ The best and easiest way is to use `Arduino Library Manager`. Search for `Blynk_
 1. Install [VS Code](https://code.visualstudio.com/)
 2. Install [PlatformIO](https://platformio.org/platformio-ide)
 3. Install **Blynk_Async_GSM_Manager** library by using [Library Manager](https://docs.platformio.org/en/latest/librarymanager/). Search for **Blynk_Async_GSM_Manager** in [Platform.io Author's Libraries](https://platformio.org/lib/search?query=author:%22Khoi%20Hoang%22)
-4. Use included [platformio.ini](examples/platformio/platformio.ini) file from examples to ensure that all dependent libraries will installed automatically
+4. Use included [platformio.ini](platformio/platformio.ini) file from examples to ensure that all dependent libraries will installed automatically. Please visit documentation for the other options and examples at [Project Configuration File](https://docs.platformio.org/page/projectconf.html)
 
 ---
 
@@ -448,6 +449,7 @@ uint16_t NUM_MENU_ITEMS = 0;
 ```
 
 ---
+---
 
 Also see examples: 
 1. [Async_TTGO_TCALL_GSM](examples/Async_TTGO_TCALL_GSM)
@@ -556,11 +558,11 @@ void loop()
 ---
 ---
 
-## Example [Async_TTGO_TCALL_GSM](examples/Async_TTGO_TCALL_GSM)
+### Example [Async_TTGO_TCALL_GSM](examples/Async_TTGO_TCALL_GSM)
 
 Please take a look at other examples, as well.
 
-1. File [Async_TTGO_TCALL_GSM.ino](examples/Async_TTGO_TCALL_GSM/Async_TTGO_TCALL_GSM.ino)
+#### 1. File [Async_TTGO_TCALL_GSM.ino](examples/Async_TTGO_TCALL_GSM/Async_TTGO_TCALL_GSM.ino)
 
 ```
 #include "defines.h"
@@ -761,7 +763,7 @@ void loop()
 }
 ```
 
-2. File [defines.h](examples/Async_TTGO_TCALL_GSM/defines.h)
+#### 2. File [defines.h](examples/Async_TTGO_TCALL_GSM/defines.h)
 
 ```cpp
 #ifndef defines_h
@@ -902,7 +904,7 @@ void loop()
 
 ```
 
-3. File [Credentials.h](examples/Async_TTGO_TCALL_GSM/Credentials.h)
+#### 3. File [Credentials.h](examples/Async_TTGO_TCALL_GSM/Credentials.h)
 
 ```cpp
 #ifndef Credentials_h
@@ -1000,7 +1002,7 @@ void loop()
 #endif    //Credentials_h
 ```
 
-4. File [dynamicParams.h](examples/Async_TTGO_TCALL_GSM/dynamicParams.h)
+#### 4. File [dynamicParams.h](examples/Async_TTGO_TCALL_GSM/dynamicParams.h)
 
 ```cpp
 #ifndef dynamicParams_h
@@ -1186,13 +1188,15 @@ BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGB
 
 ### Contributions and thanks
 
-1. Thanks to [Mike Kranidis](https://community.blynk.cc/u/mikekgr) and [Mike Kranidis @ GitHub](https://github.com/mikekgr) for initial testing the library and giving reasons, advices to start this library.
-2. Thanks to [Volodymyr Shymanskyy](https://github.com/vshymanskyy) for the [TinyGSM library](https://github.com/vshymanskyy/TinyGSM) this library depends on.
-3. Thanks to [FRANAIRBUS](https://github.com/FRANAIRBUS) to open the request to [Add dynamic parameters](https://github.com/khoih-prog/Blynk_Async_GSM_Manager/issues/5)
-4. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
+1. Thanks to [me-no-dev](https://github.com/me-no-dev) for great [ESPAsyncWebServer Library](https://github.com/me-no-dev/ESPAsyncWebServer), [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) and [AsyncTCP](https://github.com/me-no-dev/AsyncTCP).
+2. Thanks to [Mike Kranidis](https://community.blynk.cc/u/mikekgr) and [Mike Kranidis @ GitHub](https://github.com/mikekgr) for initial testing the library and giving reasons, advices to start this library.
+3. Thanks to [Volodymyr Shymanskyy](https://github.com/vshymanskyy) for the [TinyGSM library](https://github.com/vshymanskyy/TinyGSM) this library depends on.
+4. Thanks to [FRANAIRBUS](https://github.com/FRANAIRBUS) to open the request to [Add dynamic parameters](https://github.com/khoih-prog/Blynk_Async_GSM_Manager/issues/5)
+5. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
 
 <table>
   <tr>
+    <td align="center"><a href="https://github.com/me-no-dev"><img src="https://github.com/me-no-dev.png" width="100px;" alt="me-no-dev"/><br /><sub><b>⭐️⭐️ me-no-dev</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/vshymanskyy"><img src="https://github.com/vshymanskyy.png" width="100px;" alt="vshymanskyy"/><br /><sub><b>⭐️ vshymanskyy</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/mikekgr"><img src="https://github.com/mikekgr.png" width="100px;" alt="mikekgr"/><br /><sub><b>mikekgr</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/FRANAIRBUS"><img src="https://github.com/FRANAIRBUS.png" width="100px;" alt="FRANAIRBUS"/><br /><sub><b>FRANAIRBUS</b></sub></a><br /></td>
