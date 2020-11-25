@@ -23,6 +23,33 @@
     ]
   },
   "frameworks": "*",
-  "platforms": "*",
+  "dependencies": 
+  [
+    {
+      "owner": "blynkkk",
+      "name": "Blynk",
+      "version": "^0.6.1",
+      "platforms": ["espressif8266", "espressif32"]
+    },
+    {
+      "owner": "khoih-prog",
+      "name": "ESP_DoubleResetDetector",
+      "version": "^1.0.3",
+      "platforms": ["espressif8266", "espressif32"]
+    },
+    {
+      "owner": "me-no-dev",
+      "name": "ESP Async WebServer",
+      "version": "^1.2.3",
+      "platforms": ["espressif8266", "espressif32"]
+    },
+    {
+      "owner": "vshymanskyy",
+      "name": "TinyGSM",
+      "version": "^0.10.9",
+      "platforms": ["espressif8266", "espressif32"]
+    }
+  ],
+  "platforms": ["espressif8266", "espressif32"],
   "examples": "examples/*/*/*.ino"
 }
