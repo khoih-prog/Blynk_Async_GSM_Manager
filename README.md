@@ -11,9 +11,9 @@
 
 ## Table of Contents
 
-* [Why do we need this Blynk_Async_GSM_Manager library](#why-do-we-need-this-blynk_async_gsm_manager-library)
-  * [Why using AsyncWebServer is better](#features)
-  * [Features](#why-using-asyncwebserver-is-better)
+* [Why do we need this Async Blynk_Async_GSM_Manager library](#why-do-we-need-this-async-blynk_async_gsm_manager-library)
+  * [Why using AsyncWebServer is better](#why-using-asyncwebserver-is-better)
+  * [Features](#features)
   * [Currently supported Boards](#currently-supported-boards)
   * [Supported GSM Modems](#supported-gsm-modems)
   * [Supported boards-modules](#supported-boards-modules)
@@ -44,11 +44,11 @@
   * [ 5. If you don't need to add dynamic parameters](#5-if-you-dont-need-to-add-dynamic-parameters)
 * [Important Notes for using Dynamic Parameters' ids](#important-notes-for-using-dynamic-parameters-ids)
 * [Important Notes](#important-notes)
-* [Why using this BlynkGSM_Manager with MultiWiFi-MultiBlynk features](#why-using-this-blynkgsm_manager-with-multiwifi-multiblynk-features)
+* [Why using this Blynk_Async_GSM_Manager with MultiWiFi-MultiBlynk features](#why-using-this-blynk_async_gsm_manager-with-multiwifi-multiblynk-features)
 * [Examples](#examples)
   * [ 1. Async_TTGO_TCALL_GSM](examples/Async_TTGO_TCALL_GSM)
   * [ 2. Async_ESP32_GSM](examples/Async_ESP32_GSM)
-  * [ 3. ESP8266_GSM](examples/Async_ESP8266_GSM)
+  * [ 3. Async_ESP8266_GSM](examples/Async_ESP8266_GSM)
   * [ 4. Async_TTGO_TCALL_SHT3x](examples/Async_TTGO_TCALL_SHT3x)
   * [ 5. Async_ESP32_GSM_SHT3x](examples/Async_ESP32_GSM_SHT3x)
   * [ 6. Async_ESP8266_GSM_SHT3x](examples/Async_ESP8266_GSM_SHT3x)
@@ -313,7 +313,7 @@ In your code, just replacing
 
 ---
 
-### How to to migrate from Blynk
+### How to migrate from Blynk
 
 For ESP32 and ESP8266, in your code :
 
