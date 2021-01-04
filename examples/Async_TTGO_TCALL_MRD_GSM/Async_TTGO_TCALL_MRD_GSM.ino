@@ -1,6 +1,6 @@
 /****************************************************************************************************************************
-  Async_ESP32_GSM.ino
-  For ESP32 with GSM/GPRS and WiFi running simultaneously, with WiFi config portal
+  Async_TTGO_TCALL_MRD_GSM.ino
+  For ESP32 TTGO-TCALL boards to run GSM/GPRS and WiFi simultaneously, using config portal feature
 
   Blynk_Async_GSM_Manager is a library, using AsyncWebServer instead of (ESP8266)WebServer to enable GSM/GPRS and WiFi 
   running simultaneously, with WiFi config portal.
@@ -84,13 +84,17 @@ void setup()
   
   delay(200);
 
-  SerialMon.print(F("\nStart Async_ESP32_GSM (Simultaneous WiFi+GSM) using "));
+  SerialMon.print(F("\nStart Async_TTGO_TCALL_MRD_GSM (Simultaneous WiFi+GSM) using "));
   SerialMon.print(CurrentFileFS);
   SerialMon.println(" on " + String(ARDUINO_BOARD));
   SerialMon.println(BLYNK_ASYNC_GSM_MANAGER_VERSION);
 
 #if USE_BLYNK_WM
-  Serial.println(ESP_DOUBLE_RESET_DETECTOR_VERSION);
+  #if USING_MRD
+    Serial.println(ESP_MULTI_RESET_DETECTOR_VERSION);
+  #else
+    Serial.println(ESP_DOUBLE_RESET_DETECTOR_VERSION);
+  #endif
 #endif
 
   // Set-up modem reset, enable, power pins
@@ -105,7 +109,6 @@ void setup()
   SerialMon.println(F("Set GSM module baud rate"));
 
   // Set GSM module baud rate
-  //SerialAT.begin(115200);
   SerialAT.begin(115200, SERIAL_8N1, MODEM_RX, MODEM_TX);
   delay(3000);
 
@@ -132,8 +135,7 @@ void setup()
   //Blynk_WF.begin();
   // Use this to personalize DHCP hostname (RFC952 conformed)
   // 24 chars max,- only a..z A..Z 0..9 '-' and no '-' as last char
-  Blynk_WF.begin("ESP32-WiFi-GSM");
-  
+  Blynk_WF.begin("TTGO-TCALL-GSM");
 #else
   Blynk_WF.begin(wifi_blynk_tok, ssid, pass, blynk_server, BLYNK_HARDWARE_PORT);
 
@@ -197,14 +199,13 @@ void loop()
 
 #if USE_BLYNK_WM
   if (valid_apn)
+    Blynk_GSM.run();
+#else
+  Blynk_GSM.run();
 #endif
-  {
-    if (GSM_CONNECT_OK)
-      Blynk_GSM.run();
-  }
 
   check_status();
-  
+
 #if (USE_BLYNK_WM && USE_DYNAMIC_PARAMETERS)
   static bool displayedCredentials = false;
 

@@ -1,34 +1,41 @@
 /****************************************************************************************************************************
-   BlynkSimpleESP32_GSM_WFM.h
-   For ESP32 with GSM/GPRS and WiFi running simultaneously, with WiFi config portal
+  BlynkSimpleESP32_GSM_WFM.h
+  For ESP32 with GSM/GPRS and WiFi running simultaneously, with WiFi config portal
 
-   Blynk_Async_GSM_Manager is a library, using AsyncWebServer instead of (ESP8266)WebServer to enable GSM/GPRS and WiFi 
-   running simultaneously, with WiFi config portal.
-   
-   Based on and modified from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
-   Built by Khoi Hoang https://github.com/khoih-prog/BlynkGSM_Manager
-   Licensed under MIT license
-   Version: 1.0.10
+  Blynk_Async_GSM_Manager is a library, using AsyncWebServer instead of (ESP8266)WebServer to enable GSM/GPRS and WiFi 
+  running simultaneously, with WiFi config portal.
 
-   Original Blynk Library author:
-   @file       BlynkSimpleESP8266.h
-   @author     Volodymyr Shymanskyy
-   @license    This project is released under the MIT License (MIT)
-   @copyright  Copyright (c) 2015 Volodymyr Shymanskyy
-   @date       Oct 2016
-   @brief
+  Based on and modified from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
+  Built by Khoi Hoang https://github.com/khoih-prog/BlynkGSM_Manager
+  Licensed under MIT license
+  Version: 1.1.0
 
-   Version Modified By   Date      Comments
-   ------- -----------  ---------- -----------
-    1.0.6   K Hoang      25/08/2020 Initial coding to use (ESP)AsyncWebServer instead of (ESP8266)WebServer. 
-                                    Bump up to v1.0.10 to sync with BlynkGSM_Manager v1.0.10.
+  Original Blynk Library author:
+  @file       BlynkSimpleESP8266.h
+  @author     Volodymyr Shymanskyy
+  @license    This project is released under the MIT License (MIT)
+  @copyright  Copyright (c) 2015 Volodymyr Shymanskyy
+  @date       Oct 2016
+  @brief
+
+  Version Modified By   Date      Comments
+  ------- -----------  ---------- -----------
+  1.0.10   K Hoang      25/08/2020 Initial coding to use (ESP)AsyncWebServer instead of (ESP8266)WebServer. 
+                                   Bump up to v1.0.10 to sync with BlynkGSM_Manager v1.0.10.
+  1.1.0    K Hoang      03/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
  *****************************************************************************************************************************/
+
+#pragma once
 
 #ifndef BlynkSimpleEsp32_GSM_ASYNC_WFM_h
 #define BlynkSimpleEsp32_GSM_ASYNC_WFM_h
 
 #ifndef ESP32
   #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
+#endif
+
+#if !defined(BLYNK_ASYNC_GSM_MANAGER_VERSION)
+  #define BLYNK_ASYNC_GSM_MANAGER_VERSION       "Blynk_Async_GSM_Manager v1.1.0"
 #endif
 
 #define BLYNK_SEND_ATOMIC
@@ -49,48 +56,134 @@
 
 #define HTTP_PORT     80
 
-//default to use EEPROM, otherwise, use SPIFFS
-#if USE_SPIFFS
-  #include <FS.h>
-  #include "SPIFFS.h"
-  #define FileFS    SPIFFS
+// LittleFS has higher priority than SPIFFS. 
+// But if not specified any, use SPIFFS to not forcing user to install LITTLEFS library
+#if ! (defined(USE_LITTLEFS) || defined(USE_SPIFFS) )
+  #define USE_SPIFFS      true
+#endif
+
+#if USE_LITTLEFS
+  // Use LittleFS
+  #include "FS.h"
+
+  // The library will be depreciated after being merged to future major Arduino esp32 core release 2.x
+  // At that time, just remove this library inclusion
+  #include <LITTLEFS.h>             // https://github.com/lorol/LITTLEFS
+  
+  FS* filesystem =      &LITTLEFS;
+  #define FileFS        LITTLEFS
+  #warning Using LittleFS in BlynkSimpleEsp32_GSM_Async_WFM.h
+#elif USE_SPIFFS
+  #include "FS.h"
+  #include <SPIFFS.h>
+  FS* filesystem =      &SPIFFS;
+  #define FileFS        SPIFFS
+  #warning Using SPIFFS in BlynkSimpleEsp32_GSM_Async_WFM.h
 #else
   #include <EEPROM.h>
+  #warning Using EEPROM in BlynkSimpleEsp32_GSM_Async_WFM.h
 #endif
 
-///////// NEW for DRD /////////////
-// These defines must be put before #include <ESP_DoubleResetDetector.h>
-// to select where to store DoubleResetDetector's variable.
-// For ESP32, You must select one to be true (EEPROM or SPIFFS)
-// For ESP8266, You must select one to be true (RTC, EEPROM or SPIFFS)
-// Otherwise, library will use default EEPROM storage
-#define ESP8266_DRD_USE_RTC     false   //true
+#if !defined(USING_MRD)
+  #define USING_MRD       false
+#endif
 
-#if USE_SPIFFS
-#define ESP_DRD_USE_EEPROM      false
-#define ESP_DRD_USE_SPIFFS      true
+#if USING_MRD
+
+  ///////// NEW for MRD /////////////
+  // These defines must be put before #include <ESP_DoubleResetDetector.h>
+  // to select where to store DoubleResetDetector's variable.
+  // For ESP32, You must select one to be true (EEPROM or SPIFFS/LittleFS)
+  // For ESP8266, You must select one to be true (RTC, EEPROM or SPIFFS/LittleFS)
+  // Otherwise, library will use default EEPROM storage
+  #define ESP8266_MRD_USE_RTC     false   //true
+
+  #if USE_LITTLEFS
+    #define ESP_MRD_USE_LITTLEFS    true
+    #define ESP_MRD_USE_SPIFFS      false
+    #define ESP_MRD_USE_EEPROM      false
+  #elif USE_SPIFFS
+    #define ESP_MRD_USE_LITTLEFS    false
+    #define ESP_MRD_USE_SPIFFS      true
+    #define ESP_MRD_USE_EEPROM      false
+  #else
+    #define ESP_MRD_USE_LITTLEFS    false
+    #define ESP_MRD_USE_SPIFFS      false
+    #define ESP_MRD_USE_EEPROM      true
+  #endif
+
+  #ifndef MULTIRESETDETECTOR_DEBUG
+    #define MULTIRESETDETECTOR_DEBUG     false
+  #endif
+  
+  // These definitions must be placed before #include <ESP_MultiResetDetector.h> to be used
+  // Otherwise, default values (MRD_TIMES = 3, MRD_TIMEOUT = 10 seconds and MRD_ADDRESS = 0) will be used
+  // Number of subsequent resets during MRD_TIMEOUT to activate
+  #ifndef MRD_TIMES
+    #define MRD_TIMES               3
+  #endif
+
+  // Number of seconds after reset during which a
+  // subsequent reset will be considered a double reset.
+  #ifndef MRD_TIMEOUT
+    #define MRD_TIMEOUT 10
+  #endif
+
+  // EEPROM Memory Address for the MultiResetDetector to use
+  #ifndef MRD_TIMEOUT
+    #define MRD_ADDRESS 0
+  #endif
+  
+  #include <ESP_MultiResetDetector.h>      //https://github.com/khoih-prog/ESP_MultiResetDetector
+
+  //MultiResetDetector mrd(MRD_TIMEOUT, MRD_ADDRESS);
+  MultiResetDetector* mrd;
+
+  ///////// NEW for MRD /////////////
+  
 #else
-#define ESP_DRD_USE_EEPROM      true
-#define ESP_DRD_USE_SPIFFS      false
+
+  ///////// NEW for DRD /////////////
+  // These defines must be put before #include <ESP_DoubleResetDetector.h>
+  // to select where to store DoubleResetDetector's variable.
+  // For ESP32, You must select one to be true (EEPROM or SPIFFS/LittleFS)
+  // For ESP8266, You must select one to be true (RTC, EEPROM or SPIFFS/LittleFS)
+  // Otherwise, library will use default EEPROM storage
+  #define ESP8266_DRD_USE_RTC     false   //true
+
+  #if USE_LITTLEFS
+    #define ESP_DRD_USE_LITTLEFS    true
+    #define ESP_DRD_USE_SPIFFS      false
+    #define ESP_DRD_USE_EEPROM      false
+  #elif USE_SPIFFS
+    #define ESP_DRD_USE_LITTLEFS    false
+    #define ESP_DRD_USE_SPIFFS      true
+    #define ESP_DRD_USE_EEPROM      false
+  #else
+    #define ESP_DRD_USE_LITTLEFS    false
+    #define ESP_DRD_USE_SPIFFS      false
+    #define ESP_DRD_USE_EEPROM      true
+  #endif
+
+  #ifndef DOUBLERESETDETECTOR_DEBUG
+    #define DOUBLERESETDETECTOR_DEBUG     false
+  #endif
+
+  // Number of seconds after reset during which a
+  // subsequent reset will be considered a double reset.
+  #define DRD_TIMEOUT 10
+
+  // RTC Memory Address for the DoubleResetDetector to use
+  #define DRD_ADDRESS 0
+  
+  #include <ESP_DoubleResetDetector.h>      //https://github.com/khoih-prog/ESP_DoubleResetDetector
+
+  //DoubleResetDetector drd(DRD_TIMEOUT, DRD_ADDRESS);
+  DoubleResetDetector* drd;
+
+  ///////// NEW for DRD /////////////
+
 #endif
-
-#ifndef DOUBLERESETDETECTOR_DEBUG
-#define DOUBLERESETDETECTOR_DEBUG     false
-#endif
-
-#include <ESP_DoubleResetDetector.h>      //https://github.com/khoih-prog/ESP_DoubleResetDetector
-
-// Number of seconds after reset during which a
-// subseqent reset will be considered a double reset.
-#define DRD_TIMEOUT 10
-
-// RTC Memory Address for the DoubleResetDetector to use
-#define DRD_ADDRESS 0
-
-//DoubleResetDetector drd(DRD_TIMEOUT, DRD_ADDRESS);
-DoubleResetDetector* drd;
-
-///////// NEW for DRD /////////////
 
 #include <esp_wifi.h>
 #define ESP_getChipId()   ((uint32_t)ESP.getEfuseMac())
@@ -292,18 +385,26 @@ class BlynkWifi
       pinMode(LED_BUILTIN, OUTPUT);
       digitalWrite(LED_BUILTIN, LED_OFF);
       
+#if USING_MRD
+      //// New MRD ////
+      mrd = new MultiResetDetector(MRD_TIMEOUT, MRD_ADDRESS);  
+      bool noConfigPortal = true;
+   
+      if (mrd->detectMultiReset())
+#else      
       //// New DRD ////
       drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);  
       bool noConfigPortal = true;
    
       if (drd->detectDoubleReset())
+#endif
       {
-#if ( BLYNK_WM_DEBUG > 1)      
-        BLYNK_LOG1(BLYNK_F("Double Reset Detected"));
-#endif        
+#if ( BLYNK_WM_DEBUG > 1)
+        BLYNK_LOG1(BLYNK_F("Multi or Double Reset Detected"));
+#endif      
         noConfigPortal = false;
       }
-      //// New DRD ////
+      //// New DRD/MRD ////
       
 #if ( BLYNK_WM_DEBUG > 2)    
       if (LOAD_DEFAULT_CONFIG_DATA) 
@@ -331,10 +432,10 @@ class BlynkWifi
 
       BLYNK_LOG2(BLYNK_F("Hostname="), RFC952_hostname);
 
-      //// New DRD ////
-      //  noConfigPortal when getConfigData() OK and no DRD'ed
+      //// New DRD/MRD ////
+      //  noConfigPortal when getConfigData() OK and no MRD/DRD'ed
       if (getConfigData() && noConfigPortal)
-      //// New DRD ////
+      //// New DRD/MRD ////
       {
         hadConfigData = true;
 
@@ -380,7 +481,7 @@ class BlynkWifi
       else
       { 
         BLYNK_LOG2(BLYNK_F("bg: Stay forever in config portal."), 
-                   noConfigPortal ? BLYNK_F("No configDat") : BLYNK_F("DRD detected"));
+                   noConfigPortal ? BLYNK_F("No configDat") : BLYNK_F("DRD/MRD detected"));
           
         // failed to connect to Blynk server, will start configuration mode
         hadConfigData = false;
@@ -426,6 +527,15 @@ class BlynkWifi
     {
       static int retryTimes = 0;
       
+#if USING_MRD
+      //// New MRD ////
+      // Call the mulyi reset detector loop method every so often,
+      // so that it can recognise when the timeout expires.
+      // You can also call mrd.stop() when you wish to no longer
+      // consider the next reset as a multi reset.
+      mrd->loop();
+      //// New MRD ////
+#else      
       //// New DRD ////
       // Call the double reset detector loop method every so often,
       // so that it can recognise when the timeout expires.
@@ -433,6 +543,7 @@ class BlynkWifi
       // consider the next reset as a double reset.
       drd->loop();
       //// New DRD ////
+#endif
 
       // Lost connection in running. Give chance to reconfig.
       if ( WiFi.status() != WL_CONNECTED || !connected() )
@@ -784,7 +895,7 @@ class BlynkWifi
       return checkSum;
     }
 
-#if USE_SPIFFS
+#if ( USE_LITTLEFS || USE_SPIFFS )
 
 #define  CONFIG_FILENAME              BLYNK_F("/gsm_config.dat")
 #define  CONFIG_FILENAME_BACKUP       BLYNK_F("/gsm_config.bak")
@@ -1108,14 +1219,14 @@ class BlynkWifi
       
       hadConfigData = false;
       
-      // Auto format SPIFFS if not yet formatted
+      // Format SPIFFS/LittleFS if not yet
       if (!FileFS.begin(true))
       {
-        BLYNK_LOG1(BLYNK_F("SPIFFS failed! Formatting."));
+        BLYNK_LOG1(BLYNK_F("SPIFFS/LittleFS failed! Formatting."));
         
         if (!FileFS.begin())
         {
-          BLYNK_LOG1(BLYNK_F("SPIFFS failed! Pls use EEPROM."));
+          BLYNK_LOG1(BLYNK_F("SPIFFS/LittleFS failed! Pls use EEPROM."));
           return false;
         }
       }
@@ -1982,10 +2093,12 @@ class BlynkWifi
         // NEW
         if (number_items_Updated == NUM_CONFIGURABLE_ITEMS + NUM_MENU_ITEMS)
         {
-#if USE_SPIFFS
-          BLYNK_LOG2(BLYNK_F("h:UpdSPIFFS:"), CONFIG_FILENAME);
+#if USE_LITTLEFS
+          BLYNK_LOG2(BLYNK_F("h:Updating LittleFS:"), CONFIG_FILENAME);     
+#elif USE_SPIFFS
+          BLYNK_LOG2(BLYNK_F("h:Updating SPIFFS:"), CONFIG_FILENAME);
 #else
-          BLYNK_LOG1(BLYNK_F("h: UpdEEPROM"));
+          BLYNK_LOG1(BLYNK_F("h:Updating EEPROM. Please wait for reset"));
 #endif
 
           saveAllConfigData();

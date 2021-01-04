@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-  Async_ESP32_GSM.ino
+  Async_ESP32_MRD_GSM.ino
   For ESP32 with GSM/GPRS and WiFi running simultaneously, with WiFi config portal
 
   Blynk_Async_GSM_Manager is a library, using AsyncWebServer instead of (ESP8266)WebServer to enable GSM/GPRS and WiFi 
@@ -84,13 +84,17 @@ void setup()
   
   delay(200);
 
-  SerialMon.print(F("\nStart Async_ESP32_GSM (Simultaneous WiFi+GSM) using "));
+  SerialMon.print(F("\nStart Async_ESP32_MRD_GSM (Simultaneous WiFi+GSM) using "));
   SerialMon.print(CurrentFileFS);
   SerialMon.println(" on " + String(ARDUINO_BOARD));
   SerialMon.println(BLYNK_ASYNC_GSM_MANAGER_VERSION);
 
 #if USE_BLYNK_WM
-  Serial.println(ESP_DOUBLE_RESET_DETECTOR_VERSION);
+  #if USING_MRD
+    Serial.println(ESP_MULTI_RESET_DETECTOR_VERSION);
+  #else
+    Serial.println(ESP_DOUBLE_RESET_DETECTOR_VERSION);
+  #endif
 #endif
 
   // Set-up modem reset, enable, power pins

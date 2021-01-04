@@ -9,7 +9,81 @@
 ---
 ---
 
-### Why do we need the new Async [Blynk_Async_GSM_Manager library](https://github.com/khoih-prog/Blynk_Async_GSM_Manager)
+## Table of Contents
+
+* [Why do we need this Blynk_Async_GSM_Manager library](#why-do-we-need-this-blynk_async_gsm_manager-library)
+  * [Why using AsyncWebServer is better](#features)
+  * [Features](#why-using-asyncwebserver-is-better)
+  * [Currently supported Boards](#currently-supported-boards)
+  * [Supported GSM Modems](#supported-gsm-modems)
+  * [Supported boards-modules](#supported-boards-modules)
+  * [To be supported boards-modules in the future](#to-be-supported-boards-modules-in-the-future)
+* [Changelog](#changelog)
+  * [Major Releases v1.1.0](#major-releases-v110)
+  * [Releases v1.0.10](#releases-v1010)
+* [Prerequisites](#prerequisites)
+* [Installation](#installation)
+  * [Use Arduino Library Manager](#use-arduino-library-manager)
+  * [Manual Install](#manual-install)
+  * [VS Code & PlatformIO](#vs-code--platformio)
+* [Note for Platform IO using ESP32 LittleFS](#note-for-platform-io-using-esp32-littlefs)
+* [HOWTO Use analogRead() with ESP32 running WiFi and/or BlueTooth (BT/BLE)](#howto-use-analogread-with-esp32-running-wifi-andor-bluetooth-btble)
+  * [1. ESP32 has 2 ADCs, named ADC1 and ADC2](#1--esp32-has-2-adcs-named-adc1-and-adc2)
+  * [2. ESP32 ADCs functions](#2-esp32-adcs-functions)
+  * [3. ESP32 WiFi uses ADC2 for WiFi functions](#3-esp32-wifi-uses-adc2-for-wifi-functions)
+* [Important information](#important-information)
+* [How to migrate from BlynkGSM_Manager library](#how-to-migrate-from-blynkgsm_manager-library)
+  * [For ESP32-based boards](#for-esp32-based-boards)
+  * [For ESP8266-based boards](#for-esp8266-based-boards)
+* [How to migrate from Blynk](#how-to-migrate-from-blynk)
+* [HOWTO use default Credentials and have them pre-loaded onto Config Portal](#howto-use-default-credentials-and-have-them-pre-loaded-onto-config-portal)
+  * [ 1. To load Default Credentials](#1-to-load-default-credentials)
+  * [ 2. To use system default to load "blank" when there is no valid Credentials](#2-to-use-system-default-to-load-blank-when-there-is-no-valid-credentials)
+  * [ 3. Example of Default Credentials](#3-example-of-default-credentials)
+  * [ 4. How to add dynamic parameters from sketch](#4-how-to-add-dynamic-parameters-from-sketch)
+  * [ 5. If you don't need to add dynamic parameters](#5-if-you-dont-need-to-add-dynamic-parameters)
+* [Important Notes for using Dynamic Parameters' ids](#important-notes-for-using-dynamic-parameters-ids)
+* [Important Notes](#important-notes)
+* [Why using this BlynkGSM_Manager with MultiWiFi-MultiBlynk features](#why-using-this-blynkgsm_manager-with-multiwifi-multiblynk-features)
+* [Examples](#examples)
+  * [ 1. Async_TTGO_TCALL_GSM](examples/Async_TTGO_TCALL_GSM)
+  * [ 2. Async_ESP32_GSM](examples/Async_ESP32_GSM)
+  * [ 3. ESP8266_GSM](examples/Async_ESP8266_GSM)
+  * [ 4. Async_TTGO_TCALL_SHT3x](examples/Async_TTGO_TCALL_SHT3x)
+  * [ 5. Async_ESP32_GSM_SHT3x](examples/Async_ESP32_GSM_SHT3x)
+  * [ 6. Async_ESP8266_GSM_SHT3x](examples/Async_ESP8266_GSM_SHT3x)
+  * [ 7. **Async_TTGO_TCALL_MRD_GSM**](examples/Async_TTGO_TCALL_MRD_GSM)
+  * [ 8. **Async_ESP32_MRD_GSM**](examples/Async_ESP32_MRD_GSM)
+  * [ 9. **Async_ESP8266_MRD_GSM**](examples/Async_ESP8266_MRD_GSM)
+* [So, how it works?](#so-how-it-works)
+* [Example Async_TTGO_TCALL_MRD_GSM](#example-async_ttgo_tcall_mrd_gsm)
+  * [1. File Async_TTGO_TCALL_MRD_GSM.ino](#1-file-async_ttgo_tcall_mrd_gsmino)
+  * [2. File defines.h](#2-file-definesh) 
+  * [3. File Credentials.h](#3-file-credentialsh) 
+  * [4. File dynamicParams.h](#4-file-dynamicparamsh) 
+* [Debug Terminal Output Samples](#debug-terminal-output-samples)
+  * [1. Async_TTGO_TCALL_MRD_GSM using LittleFS on ESP32_DEV](#1-async_ttgo_tcall_mrd_gsm-using-littlefs-on-esp32_dev)
+  * [2. Async_ESP8266_MRD_GSM using LittleFS on ESP8266_NODEMCU](#2-async_esp8266_mrd_gsm-using-littlefs-on-esp8266_nodemcu)
+    * [2.1 Multiple Reset Detected => Config Portal](#21-multiple-reset-detected--config-portal)
+    * [2.2 Exit Config Portal](#22-exit-config-portal)
+* [Debug](#debug)
+* [Troubleshooting](#troubleshooting)
+* [Releases](#releases)
+* [Issues](#issues)
+* [TO DO](#to-do)
+* [DONE](#done)
+* [Contributions and Thanks](#contributions-and-thanks)
+* [Contributing](#contributing)
+* [License](#license)
+* [Copyright](#copyright)
+
+
+---
+---
+
+### Why do we need this Async [Blynk_Async_GSM_Manager library](https://github.com/khoih-prog/Blynk_Async_GSM_Manager)
+
+#### Why using AsyncWebServer is better
 
 - Using asynchronous network means that you can handle **more than one connection at the same time**
 - **You are called once the request is ready and parsed**
@@ -24,36 +98,33 @@
 - ServeStatic plugin that supports cache, Last-Modified, default index and more
 - Simple template processing engine to handle templates
 
----
+#### Features
 
 By design, Blynk user can run ESP32/ESP8266 boards with **either WiFi or GSM/GPRS** by using different sketches, and have to upload / update firmware to change. This library enables user to include both Blynk GSM/GPRS and WiFi libraries in one sketch, run **both WiFi and GSM/GPRS simultaneously**, or select one to use at runtime after reboot.
 
-This is also a Blynk and WiFiManager Library, now using [**ESPAsyncWebServer library**](https://github.com/me-no-dev/ESPAsyncWebServer) instead of (ESP8266)WebServer, for configuring/auto(re)connecting ESP8266/ESP32 modules to the available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either LittleFS / SPIFFS or EEPROM. Default Credentials as well as Dynamic custom parameters can be added and modified easily without coding knowledge. DoubleResetDetector is used to force Config Portal opening even if the Credentials are still valid.
+This is also a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP8266/ESP32 modules to the available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either LittleFS / SPIFFS or EEPROM. Default Credentials as well as Dynamic custom parameters can be added and modified easily without coding knowledge. DoubleResetDetector is used to force Config Portal opening even if the Credentials are still valid.
 
-- This is the new library, adding to the current Blynk_WiFiManager. It's designed to help you eliminate `hardcoding` your Blynk credentials in `ESP32 and ESP8266` boards using GSM shield (SIM800, SIM900, etc).
+- This is the new library, designed to help you eliminate `hardcoding` your Blynk credentials in `ESP32 and ESP8266` boards using GSM shield (SIM800, SIM900, etc).
 
-- You can update GSM Modem and Blynk Credentials, by using DRD, any time you need to change via Configure Portal. Data are saved in LittleFS / SPIFFS or configurable locations in EEPROM.
+- You can update GSM Modem and Blynk Credentials any time you need to change via Configure Portal. Data are saved in LittleFS / SPIFFS or configurable locations in EEPROM.
 
 New recent features:
 
 - Optional default **Credentials as well as Dynamic parameters to be optionally autoloaded into Config Portal** to use or change instead of manually input.
-- **DoubleDetectDetector** feature to force Config Portal when double reset is detected within predetermined time, default 10s.
+- **Multi or Double DetectDetector** feature to force Config Portal when multi or double reset is detected within predetermined time, default 10s.
 - Configurable **Config Portal Title** to be either HostName, BoardName or default undistinguishable names.
 - Examples are redesigned to separate Credentials / Defines / Dynamic Params / Code so that you can change Credentials / Dynamic Params quickly for each device.
 - `Multiple WiFi Credentials (SSID, Password) and system will autoconnect to the best and available WiFi SSID.`
 - `Multiple Blynk Credentials (Server, Token) and system will autoconnect to the available Blynk Servers.`
 
----
 
-### Releases v1.0.10
+#### Currently supported Boards
 
-1. Initial coding to use (ESP)AsyncWebServer instead of (ESP8266)WebServer. 
-2. Bump up to v1.0.10 to sync with [BlynkGSM_Manager library v1.0.10](https://github.com/khoih-prog/BlynkGSM_Manager).
+This [**BlynkGSM_Manager** library](https://github.com/khoih-prog/BlynkGSM_Manager) currently supports these following boards:
 
----
----
+ 1. **ESP8266 and ESP32-based boards using EEPROM, SPIFFS or LittleFS**.
 
-## Supported modems
+#### Supported GSM modems
 
 - SIMCom SIM800 series (SIM800A, SIM800C, SIM800L, SIM800H, SIM808, SIM868)
 - SIMCom SIM900 series (SIM900A, SIM900D, SIM908, SIM968)
@@ -71,7 +142,8 @@ New recent features:
 - Quectel M95
 - Quectel MC60 **(alpha)**
 
-### Supported boards/modules
+#### Supported boards-modules
+
 - Arduino MKR GSM 1400
 - GPRSbee
 - Microduino GSM
@@ -81,6 +153,8 @@ New recent features:
 - RAK WisLTE **(alpha)**
 - ... other modules, based on supported modems. Some boards require [**special configuration**](https://github.com/vshymanskyy/TinyGSM/wiki/Board-configuration).
 
+#### To be supported boards-modules in the future
+
 More modems may be supported later:
 - [ ] Quectel M10, UG95
 - [ ] SIMCom SIM7020
@@ -89,17 +163,40 @@ More modems may be supported later:
 - [ ] Hi-Link HLK-RM04
 
 ---
+---
 
-## Prerequisite
-1. [`Arduino IDE 1.8.13+` for Arduino](https://www.arduino.cc/en/Main/Software)
-2. [`ESP32 core 1.0.4+`](https://github.com/espressif/arduino-esp32/releases) for ESP32 (Use Arduino Board Manager)
-3. [`ESP8266 core 2.7.4+`](https://github.com/esp8266/Arduino/releases) for ES82662 (Use Arduino Board Manager)
-4. [`Blynk library 0.6.1+`](https://github.com/blynkkk/blynk-library/releases)
-5. [`TinyGSM library 0.10.9+`](https://github.com/vshymanskyy/TinyGSM)
-6. [`ESP_DoubleResetDetector library 1.0.3+`](https://github.com/khoih-prog/ESP_DoubleResetDetector) to use DRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_DoubleResetDetector.svg?)](https://www.ardu-badge.com/ESP_DoubleResetDetector)
-7. [`ESPAsyncWebServer v1.2.3+`](https://github.com/me-no-dev/ESPAsyncWebServer).
-8. [`ESPAsyncTCP v1.2.2+`](https://github.com/me-no-dev/ESPAsyncTCP) for ESP8266.
-9. [`AsyncTCP v1.1.1+`](https://github.com/me-no-dev/AsyncTCP) for ESP32.
+## Changelog
+
+### Major Releases v1.1.0
+
+1. Add support to LittleFS for ESP32 using [LittleFS_esp32](https://github.com/lorol/LITTLEFS) Library
+2. Add support to MultiDetectDetector. **MultiDetectDetector** feature to force Config Portal when configurable multi-reset is detected within predetermined time.
+3. Clean-up all compiler warnings possible.
+4. Add Table of Contents
+5. Add Version String
+6. Add MRD-related examples.
+
+### Releases v1.0.10
+
+1. Initial coding to use (ESP)AsyncWebServer instead of (ESP8266)WebServer. 
+2. Bump up to v1.0.10 to sync with [BlynkGSM_Manager library v1.0.10](https://github.com/khoih-prog/BlynkGSM_Manager).
+
+---
+---
+
+## Prerequisites
+
+ 1. [`Arduino IDE 1.8.13+` for Arduino](https://www.arduino.cc/en/Main/Software)
+ 2. [`ESP32 core 1.0.4+`](https://github.com/espressif/arduino-esp32/releases) for ESP32 (Use Arduino Board Manager). Check [![Latest Stable Release Version](https://img.shields.io/github/release/espressif/arduino-esp32.svg?style=plastic)](https://github.com/espressif/arduino-esp32/releases/latest/)
+ 3. [`ESP8266 core 2.7.4+`](https://github.com/esp8266/Arduino/releases) for ES82662 (Use Arduino Board Manager). Check [![Latest Release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/)
+ 4. [`Blynk library 0.6.1+`](https://github.com/blynkkk/blynk-library/releases). To install, check [![GitHub version](https://img.shields.io/github/release/blynkkk/blynk-library.svg)](https://github.com/blynkkk/blynk-library/releases/latest)
+ 5. [`TinyGSM library 0.10.9+`](https://github.com/vshymanskyy/TinyGSM). To install, check [![GitHub version](https://img.shields.io/github/release/vshymanskyy/TinyGSM.svg)](https://github.com/vshymanskyy/TinyGSM/releases/latest)
+ 6. [`ESP_DoubleResetDetector library 1.1.1+`](https://github.com/khoih-prog/ESP_DoubleResetDetector) to use DRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_DoubleResetDetector.svg?)](https://www.ardu-badge.com/ESP_DoubleResetDetector)
+ 7. [`ESP_MultiResetDetector library 1.1.1+`](https://github.com/khoih-prog/ESP_MultiResetDetector) to use MRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_MultiResetDetector.svg?)](https://www.ardu-badge.com/ESP_MultiResetDetector).
+ 8. [`ESPAsyncWebServer v1.2.3+`](https://github.com/me-no-dev/ESPAsyncWebServer).
+ 9. [`ESPAsyncTCP v1.2.2+`](https://github.com/me-no-dev/ESPAsyncTCP) for ESP8266.
+10. [`AsyncTCP v1.1.1+`](https://github.com/me-no-dev/AsyncTCP) for ESP32.
+11. [`LittleFS_esp32 v1.0.5+`](https://github.com/lorol/LITTLEFS) to use ESP32 LittleFS.
 
 ---
 
@@ -116,17 +213,36 @@ The best and easiest way is to use `Arduino Library Manager`. Search for `Blynk_
 3. Extract the zip file to `Blynk_Async_GSM_Manager-master` directory 
 4. Copy the whole `Blynk_Async_GSM_Manager-master` folder to Arduino libraries' directory such as `~/Arduino/libraries/`.
 
-### VS Code & PlatformIO:
+### VS Code & PlatformIO
+
 1. Install [VS Code](https://code.visualstudio.com/)
 2. Install [PlatformIO](https://platformio.org/platformio-ide)
-3. Install **Blynk_Async_GSM_Manager** library by using [Library Manager](https://docs.platformio.org/en/latest/librarymanager/). Search for **Blynk_Async_GSM_Manager** in [Platform.io Author's Libraries](https://platformio.org/lib/search?query=author:%22Khoi%20Hoang%22)
+3. Install [**Blynk_Async_GSM_Manager** library](https://platformio.org/lib/show/11090/Blynk_Async_GSM_Manager) by using [Library Manager](https://platformio.org/lib/show/11090/Blynk_Async_GSM_Manager/installation). Search for **Blynk_Async_GSM_Manager** in [Platform.io Author's Libraries](https://platformio.org/lib/search?query=author:%22Khoi%20Hoang%22)
 4. Use included [platformio.ini](platformio/platformio.ini) file from examples to ensure that all dependent libraries will installed automatically. Please visit documentation for the other options and examples at [Project Configuration File](https://docs.platformio.org/page/projectconf.html)
 
 ---
+---
 
-### Important information
+### Note for Platform IO using ESP32 LittleFS
 
-Please read more information in [TinyGSM Library](https://github.com/vshymanskyy/TinyGSM)
+In Platform IO, to fix the error when using [`LittleFS_esp32 v1.0`](https://github.com/lorol/LITTLEFS) for ESP32-based boards with ESP32 core v1.0.4- (ESP-IDF v3.2-), uncomment the following line
+
+from
+
+```
+//#define CONFIG_LITTLEFS_FOR_IDF_3_2   /* For old IDF - like in release 1.0.4 */
+```
+
+to
+
+```
+#define CONFIG_LITTLEFS_FOR_IDF_3_2   /* For old IDF - like in release 1.0.4 */
+```
+
+It's advisable to use the latest [`LittleFS_esp32 v1.0.5+`](https://github.com/lorol/LITTLEFS) to avoid the issue.
+
+Thanks to [Roshan](https://github.com/solroshan) to report the issue in [Error esp_littlefs.c 'utime_p'](https://github.com/khoih-prog/ESPAsync_WiFiManager/issues/28) 
+
 
 ---
 ---
@@ -166,6 +282,13 @@ Look in file [**adc_common.c**](https://github.com/espressif/esp-idf/blob/master
 - So, it's not advisable to use ADC2 with WiFi/BlueTooth (BT/BLE).
 - Use ADC1, and pins GPIO32-GPIO39
 - If somehow it's a must to use those pins serviced by ADC2 (**GPIO0, 2, 4, 12, 13, 14, 15, 25, 26 and 27**), use the **fix mentioned at the end** of [**ESP_WiFiManager Issue 39: Not able to read analog port when using the autoconnect example**](https://github.com/khoih-prog/ESP_WiFiManager/issues/39) to work with ESP32 WiFi/BlueTooth (BT/BLE).
+
+---
+---
+
+### Important information
+
+Please read more information in [TinyGSM Library](https://github.com/vshymanskyy/TinyGSM)
 
 ---
 ---
@@ -491,14 +614,6 @@ uint16_t NUM_MENU_ITEMS = 0;
 ---
 ---
 
-Also see examples: 
-1. [Async_TTGO_TCALL_GSM](examples/Async_TTGO_TCALL_GSM)
-2. [Async_ESP32_GSM](examples/Async_ESP32_GSM)
-3. [Async_ESP8266_GSM](examples/Async_ESP8266_GSM)
-4. [Async_TTGO_TCALL_SHT3x](examples/Async_TTGO_TCALL_SHT3x)
-5. [Async_ESP32_GSM_SHT3x](examples/Async_ESP32_GSM_SHT3x)
-6. [Async_ESP8266_GSM_SHT3x](examples/Async_ESP8266_GSM_SHT3x)
-
 ---
 
 ### Important Notes for using Dynamic Parameters' ids
@@ -525,6 +640,65 @@ Please be noted that the following **reserved names are already used in library*
 "pt"    for Blynk Port
 "nm"    for Board Name
 ```
+
+---
+
+### Important notes
+
+1. Now you can use special chars such as **~, !, @, #, $, %, ^, &, _, -, space,etc.**.
+2. The SSIDs, Passwords, BlynkServers and Tokens must be input (or to make them different from **blank**). Otherwise, the Config Portal will re-open until those fields have been changed. If you don't need any field, just input anything or use duplicated data from similar field.
+3. WiFi password max length now is 63 chars according to WPA2 standard. Minimum password length is 8 chars.
+4. Sometimes, it's hard or not possible to connect to Config Portal WiFi AP, the majority cases are caused by WiFi channel conflict if there are too many WiFi APs running around. Please use **random ConfigPortal WiFi AP channel** in sketch (see code snippet below) and reset the board so that another channel is used. Repeat until connection is OK
+
+```
+// Set config portal channel, default = 1. Use 0 => random channel from 1-13 to avoid conflict
+  Blynk_WF.setConfigPortalChannel(0);
+```
+
+### Why using this [Blynk_Async_GSM_Manager](https://github.com/khoih-prog/Blynk_Async_GSM_Manager) with MultiWiFi-MultiBlynk features
+
+You can see that the system **automatically detects and connects to the best or avaiable WiFi APs and/or Blynk Servers**, whenever interruption happens. This feature is very useful for systems requiring high degree of reliability.
+
+Moreover, this `Blynk_WF.begin()` is **not a blocking call**, so you can use it for critical functions requiring in loop().
+
+Anyway, this is better for projects using Blynk just for GUI (graphical user interface).
+
+In operation, if WiFi or Blynk connection is lost, `Blynk_WF.run()` will try reconnecting automatically. Therefore, `Blynk_WF.run()` must be called in the `loop()` function. Don't use:
+
+```cpp
+void loop()
+{
+  if (Blynk.connected())
+     Blynk_WF.run();
+     
+  ...
+}
+```
+just
+
+```cpp
+void loop()
+{
+  Blynk_WF.run();
+  ...
+}
+```
+
+---
+---
+
+### Examples
+
+1. [Async_TTGO_TCALL_GSM](examples/Async_TTGO_TCALL_GSM)
+2. [Async_ESP32_GSM](examples/Async_ESP32_GSM)
+3. [Async_ESP8266_GSM](examples/Async_ESP8266_GSM)
+4. [Async_TTGO_TCALL_SHT3x](examples/Async_TTGO_TCALL_SHT3x)
+5. [Async_ESP32_GSM_SHT3x](examples/Async_ESP32_GSM_SHT3x)
+6. [Async_ESP8266_GSM_SHT3x](examples/Async_ESP8266_GSM_SHT3x)
+7. [**Async_TTGO_TCALL_MRD_GSM**](examples/Async_TTGO_TCALL_MRD_GSM)
+8. [**Async_ESP32_MRD_GSM**](examples/Async_ESP32_MRD_GSM)
+9. [**Async_ESP8266_MRD_GSM**](examples/Async_ESP8266_MRD_GSM)
+
 
 ---
 ---
@@ -582,32 +756,23 @@ void loop()
   ...
 }
 ```
----
-
-### Important notes
-1. Now you can use special chars such as **~, !, @, #, $, %, ^, &, _, -, space,etc.**.
-2. The SSIDs, Passwords, BlynkServers and Tokens must be input (or to make them different from **blank**). Otherwise, the Config Portal will re-open until those fields have been changed. If you don't need any field, just input anything or use duplicated data from similar field.
-3. WiFi password max length now is 63 chars according to WPA2 standard. Minimum password length is 8 chars.
-4. Sometimes, it's hard or not possible to connect to Config Portal WiFi AP, the majority cases are caused by WiFi channel conflict if there are too many WiFi APs running around. Please use **random ConfigPortal WiFi AP channel** in sketch (see code snippet below) and reset the board so that another channel is used. Repeat until connection is OK
-
-```
-// Set config portal channel, default = 1. Use 0 => random channel from 1-13 to avoid conflict
-  Blynk.setConfigPortalChannel(0);
-```
 
 ---
 ---
 
-### Example [Async_TTGO_TCALL_GSM](examples/Async_TTGO_TCALL_GSM)
+### Example [Async_TTGO_TCALL_MRD_GSM](examples/Async_TTGO_TCALL_MRD_GSM)
 
 Please take a look at other examples, as well.
 
-#### 1. File [Async_TTGO_TCALL_GSM.ino](examples/Async_TTGO_TCALL_GSM/Async_TTGO_TCALL_GSM.ino)
+#### 1. File [Async_TTGO_TCALL_MRD_GSM.ino](examples/Async_TTGO_TCALL_MRD_GSM/Async_TTGO_TCALL_MRD_GSM.ino)
 
 ```
 #include "defines.h"
-#include "Credentials.h"
-#include "dynamicParams.h"
+
+#if USE_BLYNK_WM
+  #include "Credentials.h"
+  #include "dynamicParams.h"
+#endif
 
 void heartBeatPrint(void)
 {
@@ -667,9 +832,20 @@ void setup()
   SerialMon.begin(115200);
   while (!SerialMon);
   
-  SerialMon.print(F("\nStart Async_TTGO-TCALL-GSM using "));
+  delay(200);
+
+  SerialMon.print(F("\nStart Async_TTGO_TCALL_MRD_GSM (Simultaneous WiFi+GSM) using "));
   SerialMon.print(CurrentFileFS);
   SerialMon.println(" on " + String(ARDUINO_BOARD));
+  SerialMon.println(BLYNK_ASYNC_GSM_MANAGER_VERSION);
+
+#if USE_BLYNK_WM
+  #if USING_MRD
+    Serial.println(ESP_MULTI_RESET_DETECTOR_VERSION);
+  #else
+    Serial.println(ESP_DOUBLE_RESET_DETECTOR_VERSION);
+  #endif
+#endif
 
   // Set-up modem reset, enable, power pins
   pinMode(MODEM_PWKEY, OUTPUT);
@@ -737,7 +913,7 @@ void setup()
   {
     valid_apn = true;
 
-    for (int index = 0; index < NUM_BLYNK_CREDENTIALS; index++)
+    for (uint16_t index = 0; index < NUM_BLYNK_CREDENTIALS; index++)
     {
       Blynk_GSM.config(modem, localBlynkGSM_ESP32_config.Blynk_Creds[index].gsm_blynk_token,
                        localBlynkGSM_ESP32_config.Blynk_Creds[index].blynk_server, localBlynkGSM_ESP32_config.blynk_port);
@@ -760,7 +936,7 @@ void displayCredentials(void)
 {
   Serial.println("\nYour stored Credentials :");
 
-  for (int i = 0; i < NUM_MENU_ITEMS; i++)
+  for (uint16_t i = 0; i < NUM_MENU_ITEMS; i++)
   {
     Serial.println(String(myMenuItems[i].displayName) + " = " + myMenuItems[i].pdata);
   }
@@ -785,7 +961,7 @@ void loop()
 
   if (!displayedCredentials)
   {
-    for (int i = 0; i < NUM_MENU_ITEMS; i++)
+    for (uint16_t i = 0; i < NUM_MENU_ITEMS; i++)
     {
       if (!strlen(myMenuItems[i].pdata))
       {
@@ -803,7 +979,7 @@ void loop()
 }
 ```
 
-#### 2. File [defines.h](examples/Async_TTGO_TCALL_GSM/defines.h)
+#### 2. File [defines.h](examples/Async_TTGO_TCALL_MRD_GSM/defines.h)
 
 ```cpp
 #ifndef defines_h
@@ -816,20 +992,62 @@ void loop()
 #define BLYNK_PRINT         Serial
 #define BLYNK_HEARTBEAT     60
 
-#define DOUBLERESETDETECTOR_DEBUG     true  //false
-#define BLYNK_WM_DEBUG                3
+#define BLYNK_WM_DEBUG                1
 
-//#define USE_SPIFFS                  false
-#define USE_SPIFFS                  true
+#define USING_MRD     true
 
-#if USE_SPIFFS
+#if USING_MRD
+  // These definitions must be placed before #include <ESP_MultiResetDetector.h> to be used
+  // Otherwise, default values (MRD_TIMES = 3, MRD_TIMEOUT = 10 seconds and MRD_ADDRESS = 0) will be used
+  // Number of subsequent resets during MRD_TIMEOUT to activate
+  #define MRD_TIMES                     3
+  
+  // Number of seconds after reset during which a subseqent reset will be considered a mlti reset.
+  #define MRD_TIMEOUT                   10
+  
+  // RTC/EEPPROM Address for the MultiResetDetector to use
+  #define MRD_ADDRESS                   0
+
+  #define MULTIRESETDETECTOR_DEBUG       true 
+  
+  #warning Using MultiResetDetector MRD
+#else
+  // These definitions must be placed before #include <ESP_DoubleResetDetector.h> to be used
+  // Otherwise, default values (DRD_TIMEOUT = 10 seconds and DRD_ADDRESS = 0) will be used
+  // Number of subsequent resets during DRD_TIMEOUT to activate
+  
+  // Number of seconds after reset during which a subseqent reset will be considered a mlti reset.
+  #define DRD_TIMEOUT                   10
+
+// RTC/EEPPROM Address for the DoubleResetDetector to use
+  #define DRD_ADDRESS                   0
+
+  #define DOUBLERESETDETECTOR_DEBUG     true
+  
+  #warning Using DoubleResetDetector DRD 
+#endif
+
+// Not use #define USE_LITTLEFS and #define USE_SPIFFS  => using SPIFFS for configuration data in WiFiManager
+// (USE_LITTLEFS == false) and (USE_SPIFFS == false)    => using EEPROM for configuration data in WiFiManager
+// (USE_LITTLEFS == true) and (USE_SPIFFS == false)     => using LITTLEFS for configuration data in WiFiManager
+// (USE_LITTLEFS == true) and (USE_SPIFFS == true)      => using LITTLEFS for configuration data in WiFiManager
+// (USE_LITTLEFS == false) and (USE_SPIFFS == true)     => using SPIFFS for configuration data in WiFiManager
+// Those above #define's must be placed before #include <BlynkSimpleEsp32_GSM_Async_WFM.h>
+
+#define USE_LITTLEFS          true
+#define USE_SPIFFS            false
+
+#if USE_LITTLEFS
+  #define CurrentFileFS     F("LittleFS")
+#elif USE_SPIFFS
   #define CurrentFileFS     F("SPIFFS")
 #else
   #define CurrentFileFS     F("EEPROM")
-// EEPROM_SIZE must be <= 2048 and >= CONFIG_DATA_SIZE (currently 172 bytes)
+
+  // EEPROM_SIZE must be <= 2048 and >= CONFIG_DATA_SIZE (currently 172 bytes)
   #define EEPROM_SIZE    (2 * 1024)
   // EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
-  #define EEPROM_START  0
+  #define EEPROM_START   0
 #endif
 
 // Force some params in Blynk, only valid for library version 1.0.1 and later
@@ -944,7 +1162,7 @@ void loop()
 
 ```
 
-#### 3. File [Credentials.h](examples/Async_TTGO_TCALL_GSM/Credentials.h)
+#### 3. File [Credentials.h](examples/Async_TTGO_TCALL_MRD_GSM/Credentials.h)
 
 ```cpp
 #ifndef Credentials_h
@@ -1026,9 +1244,9 @@ void loop()
     "wapuser1",
     //char gprsPass       [32];
     "wap",
-    //char gprsPin        [12];               // A PIN (Personal Identification Number) is a 4-8 digit passcode
+    //char gprsPin        [12];               // A PIN (Personal Identification Number) is a 4-8 digit passcode  
     "1245678",
-      // END OF YOUR GSM / GPRS RELATED
+      // END OF YOUR GSM / GPRS RELATED  
     //char board_name     [24];
     "ESP32-GSM-WiFi",
     //int  checkSum, dummy, not used
@@ -1042,7 +1260,7 @@ void loop()
 #endif    //Credentials_h
 ```
 
-#### 4. File [dynamicParams.h](examples/Async_TTGO_TCALL_GSM/dynamicParams.h)
+#### 4. File [dynamicParams.h](examples/Async_TTGO_TCALL_MRD_GSM/dynamicParams.h)
 
 ```cpp
 #ifndef dynamicParams_h
@@ -1117,88 +1335,324 @@ void loop()
 ---
 ---
 
-### Debug Termimal Output Samples
+### Debug Terminal Output Samples
 
-#### This is the terminal debug output when running both WiFi and GSM/GPRS at the same time using example [Async_TTGO_TCALL_GSM](examples/Async_TTGO_TCALL_GSM)
+### 1. Async_TTGO_TCALL_MRD_GSM using LittleFS on ESP32_DEV
+
+This is the terminal debug output when running both WiFi and GSM/GPRS at the same time using example [Async_TTGO_TCALL_MRD_GSM](examples/Async_TTGO_TCALL_MRD_GSM)
+
 
 ```
-
-Start Async_TTGO-TCALL-GSM_SHT3x using SPIFFS on ESP32_DEV
+Start Async_TTGO_TCALL_MRD_GSM (Simultaneous WiFi+GSM) using LittleFS on ESP32_DEV
+Blynk_Async_GSM_Manager v1.1.0
+ESP_MultiResetDetector v1.1.1
 Set GSM module baud rate
 Use WiFi to connect Blynk
-
-SPIFFS Flag read = 0xd0d04321
-No doubleResetDetected
+LittleFS Flag read = 0xFFFE0001
+multiResetDetectorFlag = 0xFFFE0001
+lowerBytes = 0x0001, upperBytes = 0x0001
+No multiResetDetected, number of times = 1
+LittleFS Flag read = 0xFFFE0001
 Saving config file...
 Saving config file OK
-[3108] Hostname=TTGO-TCALL-GSM
-[3169] LoadCfgFile 
-[3169] OK
-[3169] CCSum=0x5ae8,RCSum=0x5ae8
-[3171] LoadCredFile 
-[3171] OK
-[3171] CrCCsum=15b9,CrRCsum=15b9
-[3171] Buffer freed
-[3173] LoadCredFile 
-[3173] OK
-[3174] CrCCsum=15b9,CrRCsum=15b9
-[3177] Hdr=ESP32_GSM_WFM,BrdName=ESP32-GSM-WiFi
-[3181] SSID=HueNet1,PW=****
-[3184] SSID1=HueNet2,PW1=****
-[3187] APN=rogers-core-appl1.apn,User=wapuser1
-[3191] PW=wap,PIN=1245678
-[3194] Server=account.ddns.net,WiFi_Token=****,GSM_Token=****
-[3204] Server1=account.duckdns.org,WiFi_Token1=****,GSM_Token1=****
-[3214] Port=8080
-[3216] ======= End Config Data =======
-[3220] Connecting MultiWifi...
-[9463] WiFi connected after time: 1
-[9463] SSID=HueNet1,RSSI=-40
-[9463] Channel=2,IP=192.168.2.81
-[9464] bg: WiFi OK. Try Blynk
-[9464] 
+[3377] Hostname=TTGO-TCALL-GSM
+[3407] LoadCfgFile 
+[3412] OK
+[3412] CCSum=0x5869,RCSum=0x5869
+[3426] LoadCredFile 
+[3430] OK
+[3431] CrCCsum=0x1975,CrRCsum=0x1975
+[3431] Hdr=ESP32_GSM_WFM,BrdName=ESP32_GSM
+[3431] SSID=HueNet1,PW=12345678
+[3431] SSID1=HueNet2,PW1=12345678
+[3433] APN=rogers-core-appl1.apn,User=wapuser1
+[3438] PW=wap,PIN=12345678
+[3440] Server=account.duckdns.org,WiFi_Token=token_wifi_1,GSM_Token=token_gsm_1
+[3450] Server1=account.ddns.net,WiFi_Token1=token_wifi_2,GSM_Token1=token_gsm_2
+[3461] Port=8080
+[3462] ======= End Config Data =======
+[3466] Connecting MultiWifi...
+[9373] WiFi connected after time: 1
+[9373] SSID:HueNet1,RSSI=-35
+[9373] Channel:2,IP address:192.168.2.101
+[9373] bg: WiFi OK. Try Blynk
+[9374] 
     ___  __          __
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
         /___/ v0.6.1 on ESP32
 
-[9477] BlynkArduinoClient.connect: Connecting to account.ddns.net:8080
-[9609] Ready (ping: 12ms).
-[9676] Connected to BlynkServer=account.ddns.net,Token=****
-[9677] bg: WiFi+Blynk OK
+[9387] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
+[9428] Ready (ping: 11ms).
+[9496] Connected to Blynk Server = account.duckdns.org, Token = token_wifi_1
+[9496] bg: WiFi+Blynk OK
 gprs apn = rogers-core-appl1.apn
-[9678] 
+[9499] 
     ___  __          __
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
         /___/ v0.6.1 on ESP32
 
-[9691] InitModem
-[9713] Con2Network
-[9724] Network:Rogers Wireless
-[9724] Conn2 rogers-core-appl1.apn
-[14955] GPRSConOK
-[14965] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
-[15609] Ready (ping: 315ms).
+[9512] InitModem
+[9750] Con2Network
+[9761] Network:Rogers Wireless
+[9761] Conn2 rogers-core-appl1.apn
+[14985] GPRSConOK
+[14995] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
+[15639] Ready (ping: 325ms).
+Stop multiResetDetecting
+Saving config file...
+Saving config file OK
+[31800] BlynkArduinoClient.connect: Connecting to :8080
 Your stored Credentials :
-MQTT Server = mqtt.duckdns.org
+MQTT Server = mqtt.ddns.net
 Port = 1883
-MQTT UserName = yourName
-MQTT PWD = yourPWD
-Subs Topics = SubsTopic1
-Pubs Topics = PubsTopic1
+MQTT UserName = mqtt-user
+MQTT PWD = mqtt-pass
+Subs Topics = SubTopic_ESP32_GSM
+Pubs Topics = PubTopic_ESP32_GSM
+BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGBGBG
+```
+
+---
+
+### 2. Async_ESP8266_MRD_GSM using LittleFS on ESP8266_NODEMCU
+
+This is the terminal debug output when running both WiFi and GSM/GPRS at the same time using example [Async_ESP8266_MRD_GSM](examples/Async_ESP8266_MRD_GSM)
+
+#### 2.1 Multiple Reset Detected => Config Portal
+
+
+```
+Start Async_ESP8266_MRD_GSM (Simultaneous WiFi+GSM) using LittleFS on ESP8266_NODEMCU
+Blynk_Async_GSM_Manager v1.1.0
+ESP_MultiResetDetector v1.1.1
+Set GSM module baud rate
+Use WiFi to connect Blynk
+LittleFS Flag read = 0xFFFC0003
+multiResetDetectorFlag = 0xFFFC0003
+lowerBytes = 0x0003, upperBytes = 0x0003
+multiResetDetected, number of times = 3
+Saving config file...
+Saving config file OK
+[3310] Hostname=ESP8266-WiFi-GSM
+[3339] LoadCfgFile 
+[3339] OK
+[3339] CCSum=0x5957,RCSum=0x5957
+[3344] LoadCredFile 
+[3344] OK
+[3344] CrCCsum=0x1975,CrRCsum=0x1975
+[3344] Hdr=ESP8266_GSM_WFM,BrdName=ESP8266_MRD_GSM
+[3344] SSID=HueNet1,PW=12345678
+[3347] SSID1=HueNet2,PW1=12345678
+[3350] APN=rogers-core-appl1.apn,User=wapuser1
+[3354] PW=wap,PIN=12345678
+[3356] Server=account.duckdns.org,WiFi_Token=token_wifi_1,GSM_Token=token_gsm_1
+[3367] Server1=account.ddns.net,WiFi_Token1=token_wifi_2,GSM_Token1=token_gsm_2
+[3377] Port=8080
+[3378] ======= End Config Data =======
+[3382] bg: Stay forever in config portal.DRD/MRD detected
+[5441] 
+stConf:SSID=TestPortal-ESP8266,PW=TestPortalPass
+[5441] IP=192.168.232.1,ch=7
+[5573] LoadCfgFile 
+[5573] OK
+[5573] CCSum=0x5957,RCSum=0x5957
+[5578] LoadCredFile 
+[5578] OK
+[5578] CrCCsum=0x1975,CrRCsum=0x1975
+[5579] Hdr=ESP8266_GSM_WFM,BrdName=ESP8266_MRD_GSM
+[5579] SSID=HueNet1,PW=12345678
+[5581] SSID1=HueNet2,PW1=12345678
+[5584] APN=rogers-core-appl1.apn,User=wapuser1
+[5588] PW=wap,PIN=12345678
+[5591] Server=account.duckdns.org,WiFi_Token=token_wifi_1,GSM_Token=token_gsm_1
+[5601] Server1=account.ddns.net,WiFi_Token1=token_wifi_2,GSM_Token1=token_gsm_2
+[5611] Port=8080
+[5613] ======= End Config Data =======
+gprs apn = rogers-core-appl1.apn
+[5619] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on NodeMCU
+
+[5632] InitModem
+[15834] failed
+[15834] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on NodeMCU
+
+[15837] InitModem
+[26039] failed
+FF
+Your stored Credentials :
+MQTT Server = mqtt.ddns.net
+Port = 1883
+MQTT UserName = mqtt-user
+MQTT PWD = mqtt-pass
+Subs Topics = SubTopic_ESP32_GSM
+Pubs Topics = PubTopic_ESP32_GSM
+[71549] h:Updating LittleFS:/gsm_config.dat
+[71559] SaveCfgFile 
+[71559] WCSum=0x5adf
+[71659] OK
+[71669] SaveBkUpCfgFile 
+[71733] OK
+[71744] SaveCredFile 
+[72129] OK
+[72129] CrWCSum=0x1975
+[72133] SaveBkUpCredFile 
+[72191] OK
+[72195] SaveCredFile 
+[72256] OK
+[72257] CrWCSum=0x1975
+[72261] SaveBkUpCredFile 
+[72317] OK
+[72317] h:Rst
+```
+
+---
+
+#### 2.2 Exit Config Portal
+
+```
+Start Async_ESP8266_MRD_GSM (Simultaneous WiFi+GSM) using LittleFS on ESP8266_NODEMCU
+Blynk_Async_GSM_Manager v1.1.0
+ESP_MultiResetDetector v1.1.1
+Set GSM module baud rate
+Use WiFi to connect Blynk
+LittleFS Flag read = 0xFFFE0001
+multiResetDetectorFlag = 0xFFFE0001
+lowerBytes = 0x0001, upperBytes = 0x0001
+No multiResetDetected, number of times = 1
+LittleFS Flag read = 0xFFFE0001
+Saving config file...
+Saving config file OK
+[3389] Hostname=ESP8266-WiFi-GSM
+[3401] LoadCfgFile 
+[3401] OK
+[3401] CCSum=0x5adf,RCSum=0x5adf
+[3403] LoadCredFile 
+[3403] OK
+[3403] CrCCsum=0x1975,CrRCsum=0x1975
+[3404] Hdr=ESP8266_GSM_WFM,BrdName=ESP8266_MRD_GSM
+[3406] SSID=HueNet1,PW=12345678
+[3409] SSID1=HueNet2,PW1=12345678
+[3412] APN=rogers-core-appl1.apn,User=wapuser1
+[3416] PW=wap,PIN=12345678
+[3418] Server=account.duckdns.org,WiFi_Token=token_wifi_1,GSM_Token=token_gsm_1
+[3429] Server1=account.ddns.net,WiFi_Token1=token_wifi_2,GSM_Token1=token_gsm_2
+[3439] Port=8080
+[3441] ======= End Config Data =======
+[3444] Connecting MultiWifi...
+[9715] WiFi connected after time: 1
+[9715] SSID=HueNet1,RSSI=-33
+[9715] Channel=2,IP=192.168.2.166
+[9715] bg: WiFi OK. Try Blynk
+[9715] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on NodeMCU
+
+[9728] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
+[9828] Ready (ping: 15ms).
+[9895] Connected to BlynkServer=account.duckdns.org,Token=token_wifi_1
+[9895] bg: WiFi+Blynk OK
+gprs apn = rogers-core-appl1.apn
+[9897] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on NodeMCU
+
+[9921] InitModem
+[9950] Con2Network
+[9961] Network:Rogers Wireless
+[9961] Conn2 rogers-core-appl1.apn
+[15185] GPRSConOK
+[15195] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
+[15839] Ready (ping: 275ms).
+Stop multiResetDetecting
+Saving config file...
+Saving config file OK
+Your stored Credentials :
+MQTT Server = mqtt.ddns.net
+Port = 1883
+MQTT UserName = mqtt-user
+MQTT PWD = mqtt-pass
+Subs Topics = SubTopic_ESP32_GSM
+Pubs Topics = PubTopic_ESP32_GSM
 BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGBGBG
 ```
 
 ---
 ---
 
+
+### Debug
+
+Debug is enabled by default on Serial.
+
+You can also change the debugging level from 0 to 4
+
+```cpp
+#define BLYNK_PRINT        Serial
+
+#define BLYNK_WM_DEBUG     3
+
+#define USING_MRD          true
+
+#if USING_MRD
+  #define MULTIRESETDETECTOR_DEBUG        true 
+#else
+  #define DOUBLERESETDETECTOR_DEBUG       false
+#endif
+```
+
+---
+
+### Troubleshooting
+
+If you get compilation errors, more often than not, you may need to install a newer version of the core for Arduino boards.
+
+Sometimes, the library will only work if you update the board core to the latest version because I am using newly added functions.
+
+
+---
+---
+
+## Releases
+
+### Major Releases v1.1.0
+
+1. Add support to LittleFS for ESP32 using [LittleFS_esp32](https://github.com/lorol/LITTLEFS) Library
+2. Add support to MultiDetectDetector. **MultiDetectDetector** feature to force Config Portal when configurable multi-reset is detected within predetermined time.
+3. Clean-up all compiler warnings possible.
+4. Add Table of Contents
+5. Add Version String
+6. Add MRD-related examples.
+
 ### Releases v1.0.10
 
 1. Initial coding to use (ESP)AsyncWebServer instead of (ESP8266)WebServer. 
 2. Bump up to v1.0.10 to sync with [BlynkGSM_Manager library v1.0.10](https://github.com/khoih-prog/BlynkGSM_Manager).
+
+---
+---
+
+### Issues ###
+
+Submit issues to: [Blynk_Async_GSM_Manager issues](https://github.com/khoih-prog/Blynk_Async_GSM_Manager/issues)
 
 ---
 ---
@@ -1223,10 +1677,17 @@ BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGBGBG BGBGBGBGBGBGBGBGB
 12. Configurable Config Portal Title
 13. Re-structure all examples to separate Credentials / Defines / Dynamic Params / Code so that you can change Credentials / Dynamic Params quickly for each device.
 14. Using [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) instead of (ESP8266)WebServer.
+15. Add **LittleFS** support to ESP8266 as SPIFFS deprecated since **ESP8266 core 2.7.1.**
+16. Add **LittleFS** support to ESP32 using [LITTLEFS](https://github.com/lorol/LITTLEFS) Library.
+17. Add support to MultiDetectDetector and MRD-related examples
+18. Clean-up all compiler warnings possible.
+19. Add Table of Contents
+20. Add Version String
 
 ---
+---
 
-### Contributions and thanks
+### Contributions and Thanks
 
 1. Thanks to [me-no-dev](https://github.com/me-no-dev) for great [ESPAsyncWebServer Library](https://github.com/me-no-dev/ESPAsyncWebServer), [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP) and [AsyncTCP](https://github.com/me-no-dev/AsyncTCP).
 2. Thanks to [Mike Kranidis](https://community.blynk.cc/u/mikekgr) and [Mike Kranidis @ GitHub](https://github.com/mikekgr) for initial testing the library and giving reasons, advices to start this library.
@@ -1258,7 +1719,7 @@ If you want to contribute to this project:
 
 ### License
 
-- The library is licensed under [MIT](https://github.com/khoih-prog/WebSockets2_Generic/blob/master/LICENSE)
+- The library is licensed under [MIT](https://github.com/khoih-prog/Blynk_Async_GSM_Manager/blob/master/LICENSE)
 
 ---
 

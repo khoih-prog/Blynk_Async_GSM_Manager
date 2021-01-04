@@ -1,8 +1,7 @@
 /****************************************************************************************************************************
   defines.h
-  For ESP8266 boards to run GSM/GPRS and WiFi simultaneously, using config portal feature
-  Uploading SHT3x temperature and humidity data to Blynk
-  
+  For ESP32 with GSM/GPRS and WiFi running simultaneously, with WiFi config portal
+
   Blynk_Async_GSM_Manager is a library, using AsyncWebServer instead of (ESP8266)WebServer to enable GSM/GPRS and WiFi 
   running simultaneously, with WiFi config portal.
 
@@ -21,43 +20,69 @@
 #ifndef defines_h
 #define defines_h
 
-#ifndef ESP8266
-  #error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
+#ifndef ESP32
+  #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
 #endif
 
 #define BLYNK_PRINT         Serial
 #define BLYNK_HEARTBEAT     60
 
-#define DOUBLERESETDETECTOR_DEBUG     true    //false
 #define BLYNK_WM_DEBUG                1
 
-// #define USE_SPIFFS and USE_LITTLEFS   false        => using EEPROM for configuration data in WiFiManager
-// #define USE_LITTLEFS    true                       => using LITTLEFS for configuration data in WiFiManager
-// #define USE_LITTLEFS    false and USE_SPIFFS true  => using SPIFFS for configuration data in WiFiManager
-// Be sure to define USE_LITTLEFS and USE_SPIFFS before #include <BlynkSimpleEsp8266_WM.h>
-// From ESP8266 core 2.7.1, SPIFFS will be deprecated and to be replaced by LittleFS
-// Select USE_LITTLEFS (higher priority) or USE_SPIFFS
+#define USING_MRD     true
 
-#define USE_LITTLEFS                true
-//#define USE_LITTLEFS                false
-#define USE_SPIFFS                  false
-//#define USE_SPIFFS                  true
+#if USING_MRD
+  // These definitions must be placed before #include <ESP_MultiResetDetector.h> to be used
+  // Otherwise, default values (MRD_TIMES = 3, MRD_TIMEOUT = 10 seconds and MRD_ADDRESS = 0) will be used
+  // Number of subsequent resets during MRD_TIMEOUT to activate
+  #define MRD_TIMES                     3
+  
+  // Number of seconds after reset during which a subseqent reset will be considered a mlti reset.
+  #define MRD_TIMEOUT                   10
+  
+  // RTC/EEPPROM Address for the MultiResetDetector to use
+  #define MRD_ADDRESS                   0
+
+  #define MULTIRESETDETECTOR_DEBUG       true 
+  
+  #warning Using MultiResetDetector MRD
+#else
+  // These definitions must be placed before #include <ESP_DoubleResetDetector.h> to be used
+  // Otherwise, default values (DRD_TIMEOUT = 10 seconds and DRD_ADDRESS = 0) will be used
+  // Number of subsequent resets during DRD_TIMEOUT to activate
+  
+  // Number of seconds after reset during which a subseqent reset will be considered a mlti reset.
+  #define DRD_TIMEOUT                   10
+
+// RTC/EEPPROM Address for the DoubleResetDetector to use
+  #define DRD_ADDRESS                   0
+
+  #define DOUBLERESETDETECTOR_DEBUG     true
+  
+  #warning Using DoubleResetDetector DRD 
+#endif
+
+// Not use #define USE_LITTLEFS and #define USE_SPIFFS  => using SPIFFS for configuration data in WiFiManager
+// (USE_LITTLEFS == false) and (USE_SPIFFS == false)    => using EEPROM for configuration data in WiFiManager
+// (USE_LITTLEFS == true) and (USE_SPIFFS == false)     => using LITTLEFS for configuration data in WiFiManager
+// (USE_LITTLEFS == true) and (USE_SPIFFS == true)      => using LITTLEFS for configuration data in WiFiManager
+// (USE_LITTLEFS == false) and (USE_SPIFFS == true)     => using SPIFFS for configuration data in WiFiManager
+// Those above #define's must be placed before #include <BlynkSimpleEsp32_GSM_Async_WFM.h>
+
+#define USE_LITTLEFS          true
+#define USE_SPIFFS            false
 
 #if USE_LITTLEFS
-  //LittleFS has higher priority
   #define CurrentFileFS     F("LittleFS")
-  #ifdef USE_SPIFFS
-    #undef USE_SPIFFS
-  #endif
-  #define USE_SPIFFS                  false
 #elif USE_SPIFFS
   #define CurrentFileFS     F("SPIFFS")
 #else
   #define CurrentFileFS     F("EEPROM")
-  // EEPROM_SIZE must be <= 4096 and >= CONFIG_DATA_SIZE (currently 172 bytes)
-  #define EEPROM_SIZE    (4 * 1024)
+
+  // EEPROM_SIZE must be <= 2048 and >= CONFIG_DATA_SIZE (currently 172 bytes)
+  #define EEPROM_SIZE    (2 * 1024)
   // EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
-  #define EEPROM_START  0
+  #define EEPROM_START   0
 #endif
 
 // Force some params in Blynk, only valid for library version 1.0.1 and later
@@ -66,16 +91,16 @@
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 // Those above #define's must be placed before #include <BlynkSimpleTinyGSM_Async_M.h>
 
+// TTGO T-Call pin definitions
+#define MODEM_RST            5
+#define MODEM_PWKEY          4
+#define MODEM_POWER_ON       23
 
-#define MODEM_RST            D0     // Pin D0 mapped to pin GPIO16/USER/WAKE of ESP8266. This pin is also used for Onboard-Blue LED. 
-#define MODEM_PWKEY          D5     // Pin D5 mapped to pin GPIO14/HSCLK of ESP8266
-#define MODEM_POWER_ON       D6     // Pin D6 mapped to pin GPIO12/HMISO of ESP8266
+#define MODEM_TX             27
+#define MODEM_RX             26
 
-#define MODEM_TX             D8     // Pin D8 mapped to pin GPIO15/TXD2/HCS of ESP8266
-#define MODEM_RX             D7     // Pin D7 mapped to pin GPIO13/RXD2/HMOSI of ESP8266
-
-#define I2C_SDA              D2     // Pin D2 mapped to pin GPIO4/SDA of ESP8266
-#define I2C_SCL              D1     // Pin D1 mapped to pin GPIO5/SCL of ESP8266
+#define I2C_SDA              21
+#define I2C_SCL              22
 
 // Select your modem:
 #define TINY_GSM_MODEM_SIM800
@@ -114,10 +139,10 @@
 
 #if USE_BLYNK_WM
 
-  #include <BlynkSimpleEsp8266_GSM_Async_WFM.h>
+  #include <BlynkSimpleEsp32_GSM_Async_WFM.h>
 
 #else
-  #include <BlynkSimpleEsp8266_GSM_Async_WF.h>
+  #include <BlynkSimpleEsp32_GSM_Async_WF.h>
   
   // Your WiFi credentials.
   #define ssid  "****"
@@ -149,8 +174,11 @@
 // Set serial for debug console (to the Serial Monitor, default speed 115200)
 #define SerialMon Serial
 
-#include <SoftwareSerial.h>
-SoftwareSerial SerialAT(MODEM_RX, MODEM_TX); // RX, TX
+#define RXD2      16
+#define TXD2      17
+
+// Use ESP32 Serial2 for GSM
+#define SerialAT  Serial2
 
 // Uncomment this if you want to see all AT commands
 #define DUMP_AT_COMMANDS      false
@@ -163,6 +191,6 @@ SoftwareSerial SerialAT(MODEM_RX, MODEM_TX); // RX, TX
   TinyGsm modem(SerialAT);
 #endif
 
-#define HOST_NAME   "ASYNC-8266-GSM-WiFi"
+#define HOST_NAME   "ASYNC-TTGO-TCALL"
 
 #endif      //defines_h

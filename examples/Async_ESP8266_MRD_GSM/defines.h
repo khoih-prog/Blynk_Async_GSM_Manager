@@ -28,8 +28,40 @@
 #define BLYNK_PRINT         Serial
 #define BLYNK_HEARTBEAT     60
 
-#define DOUBLERESETDETECTOR_DEBUG     true    //false
 #define BLYNK_WM_DEBUG                1
+
+#define USING_MRD     true
+
+#if USING_MRD
+  // These definitions must be placed before #include <ESP_MultiResetDetector.h> to be used
+  // Otherwise, default values (MRD_TIMES = 3, MRD_TIMEOUT = 10 seconds and MRD_ADDRESS = 0) will be used
+  // Number of subsequent resets during MRD_TIMEOUT to activate
+  #define MRD_TIMES                     3
+  
+  // Number of seconds after reset during which a subseqent reset will be considered a mlti reset.
+  #define MRD_TIMEOUT                   10
+  
+  // RTC/EEPPROM Address for the MultiResetDetector to use
+  #define MRD_ADDRESS                   0
+
+  #define MULTIRESETDETECTOR_DEBUG       true 
+  
+  #warning Using MultiResetDetector MRD
+#else
+  // These definitions must be placed before #include <ESP_DoubleResetDetector.h> to be used
+  // Otherwise, default values (DRD_TIMEOUT = 10 seconds and DRD_ADDRESS = 0) will be used
+  // Number of subsequent resets during DRD_TIMEOUT to activate
+  
+  // Number of seconds after reset during which a subseqent reset will be considered a mlti reset.
+  #define DRD_TIMEOUT                   10
+
+// RTC/EEPPROM Address for the DoubleResetDetector to use
+  #define DRD_ADDRESS                   0
+
+  #define DOUBLERESETDETECTOR_DEBUG     true
+  
+  #warning Using DoubleResetDetector DRD 
+#endif
 
 // #define USE_SPIFFS and USE_LITTLEFS   false        => using EEPROM for configuration data in WiFiManager
 // #define USE_LITTLEFS    true                       => using LITTLEFS for configuration data in WiFiManager

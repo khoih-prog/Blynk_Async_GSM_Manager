@@ -1,7 +1,8 @@
 /****************************************************************************************************************************
-  Async_ESP32_GSM.ino
-  For ESP32 with GSM/GPRS and WiFi running simultaneously, with WiFi config portal
-
+  Async_ESP8266_MRD_GSM.ino
+  For ESP8266 boards to run GSM/GPRS and WiFi simultaneously, using config portal feature
+  Uploading SHT3x temperature and humidity data to Blynk
+  
   Blynk_Async_GSM_Manager is a library, using AsyncWebServer instead of (ESP8266)WebServer to enable GSM/GPRS and WiFi 
   running simultaneously, with WiFi config portal.
 
@@ -23,6 +24,7 @@
   #include "Credentials.h"
   #include "dynamicParams.h"
 #endif
+
 
 void heartBeatPrint(void)
 {
@@ -81,18 +83,22 @@ void setup()
   // Set console baud rate
   SerialMon.begin(115200);
   while (!SerialMon);
-  
+
   delay(200);
 
-  SerialMon.print(F("\nStart Async_ESP32_GSM (Simultaneous WiFi+GSM) using "));
+  SerialMon.print(F("\nStart Async_ESP8266_MRD_GSM (Simultaneous WiFi+GSM) using "));
   SerialMon.print(CurrentFileFS);
   SerialMon.println(" on " + String(ARDUINO_BOARD));
   SerialMon.println(BLYNK_ASYNC_GSM_MANAGER_VERSION);
 
 #if USE_BLYNK_WM
-  Serial.println(ESP_DOUBLE_RESET_DETECTOR_VERSION);
+  #if USING_MRD
+    Serial.println(ESP_MULTI_RESET_DETECTOR_VERSION);
+  #else
+    Serial.println(ESP_DOUBLE_RESET_DETECTOR_VERSION);
+  #endif
 #endif
-
+  
   // Set-up modem reset, enable, power pins
   pinMode(MODEM_PWKEY, OUTPUT);
   pinMode(MODEM_RST, OUTPUT);
@@ -105,8 +111,8 @@ void setup()
   SerialMon.println(F("Set GSM module baud rate"));
 
   // Set GSM module baud rate
-  //SerialAT.begin(115200);
-  SerialAT.begin(115200, SERIAL_8N1, MODEM_RX, MODEM_TX);
+  SerialAT.begin(115200);
+
   delay(3000);
 
   Serial.println(F("Use WiFi to connect Blynk"));
@@ -114,7 +120,7 @@ void setup()
 #if USE_BLYNK_WM
 
   // Set config portal SSID and Password
-  Blynk_WF.setConfigPortal("TestPortal-ESP32", "TestPortalPass");
+  Blynk_WF.setConfigPortal("TestPortal-ESP8266", "TestPortalPass");
     
   // Use configurable AP IP, instead of default IP 192.168.4.1
   Blynk_WF.setConfigPortalIP(IPAddress(192, 168, 232, 1));
@@ -132,7 +138,7 @@ void setup()
   //Blynk_WF.begin();
   // Use this to personalize DHCP hostname (RFC952 conformed)
   // 24 chars max,- only a..z A..Z 0..9 '-' and no '-' as last char
-  Blynk_WF.begin("ESP32-WiFi-GSM");
+  Blynk_WF.begin("ESP8266-WiFi-GSM");
   
 #else
   Blynk_WF.begin(wifi_blynk_tok, ssid, pass, blynk_server, BLYNK_HARDWARE_PORT);
@@ -145,14 +151,14 @@ void setup()
 #endif
 
 #if USE_BLYNK_WM
-  Blynk_WF_Configuration localBlynkGSM_ESP32_config;
+  Blynk_WF_Configuration localBlynkGSM_ESP8266_config;
 
-  Blynk_WF.getFullConfigData(&localBlynkGSM_ESP32_config);
+  Blynk_WF.getFullConfigData(&localBlynkGSM_ESP8266_config);
 
   Serial.print(F("gprs apn = "));
-  Serial.println(localBlynkGSM_ESP32_config.apn);
+  Serial.println(localBlynkGSM_ESP8266_config.apn);
 
-  if (String(localBlynkGSM_ESP32_config.apn) == NO_CONFIG)
+  if (String(localBlynkGSM_ESP8266_config.apn) == NO_CONFIG)
   {
     Serial.println(F("No valid stored apn. Must run WiFi to Open config portal"));
     valid_apn = false;
@@ -163,11 +169,11 @@ void setup()
 
     for (uint16_t index = 0; index < NUM_BLYNK_CREDENTIALS; index++)
     {
-      Blynk_GSM.config(modem, localBlynkGSM_ESP32_config.Blynk_Creds[index].gsm_blynk_token,
-                       localBlynkGSM_ESP32_config.Blynk_Creds[index].blynk_server, localBlynkGSM_ESP32_config.blynk_port);
+      Blynk_GSM.config(modem, localBlynkGSM_ESP8266_config.Blynk_Creds[index].gsm_blynk_token,
+                       localBlynkGSM_ESP8266_config.Blynk_Creds[index].blynk_server, localBlynkGSM_ESP8266_config.blynk_port);
 
-      GSM_CONNECT_OK = Blynk_GSM.connectNetwork(localBlynkGSM_ESP32_config.apn, localBlynkGSM_ESP32_config.gprsUser,
-                       localBlynkGSM_ESP32_config.gprsPass);
+      GSM_CONNECT_OK = Blynk_GSM.connectNetwork(localBlynkGSM_ESP8266_config.apn, localBlynkGSM_ESP8266_config.gprsUser,
+                       localBlynkGSM_ESP8266_config.gprsPass);
 
       if (GSM_CONNECT_OK)
       {
@@ -204,7 +210,7 @@ void loop()
   }
 
   check_status();
-  
+
 #if (USE_BLYNK_WM && USE_DYNAMIC_PARAMETERS)
   static bool displayedCredentials = false;
 
