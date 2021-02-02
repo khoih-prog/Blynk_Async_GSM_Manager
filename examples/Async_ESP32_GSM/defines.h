@@ -6,15 +6,8 @@
   running simultaneously, with WiFi config portal.
 
   Based on and modified from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
-  Built by Khoi Hoang https://github.com/khoih-prog/BlynkGSM_Manager
+  Built by Khoi Hoang https://github.com/khoih-prog/Blynk_Async_GSM_Manager
   Licensed under MIT license
-  Version: 1.1.0
-
-  Version Modified By   Date      Comments
-  ------- -----------  ---------- -----------
-  1.0.10   K Hoang      25/08/2020 Initial coding to use (ESP)AsyncWebServer instead of (ESP8266)WebServer. 
-                                Bump up to v1.0.10 to sync with BlynkGSM_Manager v1.0.10.
-  1.1.0    K Hoang      03/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
  *****************************************************************************************************************************/
 
 #ifndef defines_h
@@ -57,7 +50,10 @@
 #define TIMEOUT_RECONNECT_WIFI                    10000L
 #define RESET_IF_CONFIG_TIMEOUT                   true
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
-// Those above #define's must be placed before #include <BlynkSimpleTinyGSM_Async_M.h>
+
+// Config Timeout 120s (default 60s)
+#define CONFIG_TIMEOUT                            120000L
+// Those above #define's must be placed before #include <BlynkSimpleEsp32_GSM_Async_WFM.h>
 
 // TTGO T-Call pin definitions
 #define MODEM_RST            5
@@ -106,6 +102,7 @@
 #include <BlynkSimpleTinyGSM_Async_M.h>
 
 #if USE_BLYNK_WM
+  #define USE_DYNAMIC_PARAMETERS                    true
 
   #include <BlynkSimpleEsp32_GSM_Async_WFM.h>
 

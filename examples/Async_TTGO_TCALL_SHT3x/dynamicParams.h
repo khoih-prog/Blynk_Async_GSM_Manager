@@ -6,15 +6,8 @@
   running simultaneously, with WiFi config portal.
 
   Based on and modified from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
-  Built by Khoi Hoang https://github.com/khoih-prog/BlynkGSM_Manager
+  Built by Khoi Hoang https://github.com/khoih-prog/Blynk_Async_GSM_Manager
   Licensed under MIT license
-  Version: 1.1.0
-
-  Version Modified By   Date      Comments
-  ------- -----------  ---------- -----------
-  1.0.10   K Hoang      25/08/2020 Initial coding to use (ESP)AsyncWebServer instead of (ESP8266)WebServer. 
-                                Bump up to v1.0.10 to sync with BlynkGSM_Manager v1.0.10.
-  1.1.0    K Hoang      03/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
  *****************************************************************************************************************************/
 
 #ifndef dynamicParams_h
@@ -22,7 +15,11 @@
 
 #if USE_BLYNK_WM
 
-  #define USE_DYNAMIC_PARAMETERS      true
+#if (USE_DYNAMIC_PARAMETERS)
+  #warning USE_DYNAMIC_PARAMETERS
+#endif
+
+// USE_DYNAMIC_PARAMETERS defined in defined.h
   
   /////////////// Start dynamic Credentials ///////////////
   

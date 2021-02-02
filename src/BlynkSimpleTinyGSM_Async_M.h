@@ -6,9 +6,8 @@
   running simultaneously, with WiFi config portal.
 
   Based on and modified from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
-  Built by Khoi Hoang https://github.com/khoih-prog/BlynkGSM_Manager
+  Built by Khoi Hoang https://github.com/khoih-prog/Blynk_Async_GSM_Manager
   Licensed under MIT license
-  Version: 1.1.0
 
   Original Blynk Library author:
   @file       BlynkSimpleESP8266.h
@@ -17,12 +16,16 @@
   @copyright  Copyright (c) 2015 Volodymyr Shymanskyy
   @date       Oct 2016
   @brief
+  
+  Version: 1.2.0
 
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.0.10   K Hoang      25/08/2020 Initial coding to use (ESP)AsyncWebServer instead of (ESP8266)WebServer. 
-                                Bump up to v1.0.10 to sync with BlynkGSM_Manager v1.0.10.
+                                   Bump up to v1.0.10 to sync with BlynkGSM_Manager v1.0.10.
   1.1.0    K Hoang      03/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
+  1.2.0    K Hoang      02/02/2021 Add functions to control Config Portal (CP) from software or Virtual Switches
+                                   Fix CP and Dynamic Params bugs. To permit autoreset after timeout if DRD/MRD or forced CP
  *****************************************************************************************************************************/
 
 #pragma once
@@ -31,7 +34,7 @@
 #define BlynkSimpleTinyGSM_ASYNC_M_h
 
 #if !defined(BLYNK_ASYNC_GSM_MANAGER_VERSION)
-  #define BLYNK_ASYNC_GSM_MANAGER_VERSION       "Blynk_Async_GSM_Manager v1.1.0"
+  #define BLYNK_ASYNC_GSM_MANAGER_VERSION       "Blynk_Async_GSM_Manager v1.2.0"
 #endif
 
 #ifdef ESP32
