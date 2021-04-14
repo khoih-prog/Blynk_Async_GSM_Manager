@@ -226,8 +226,13 @@ typedef struct
   char gsm_blynk_token  [BLYNK_TOKEN_MAX_LEN];
 }  Blynk_Credentials;
 
-#define NUM_WIFI_CREDENTIALS      2
-#define NUM_BLYNK_CREDENTIALS     2
+
+#ifndef NUM_WIFI_CREDENTIALS
+  #define NUM_WIFI_CREDENTIALS      2
+#endif
+#ifndef NUM_BLYNK_CREDENTIALS
+  #define NUM_BLYNK_CREDENTIALS     2
+#endif
 
 // Configurable items besides fixed Header
 #define NUM_CONFIGURABLE_ITEMS    ( 6 + (2 * NUM_WIFI_CREDENTIALS) + (3 * NUM_BLYNK_CREDENTIALS) )
